@@ -1,0 +1,28 @@
+Options -Indexes
+
+# Force HTTPS (désactiver cette règle si le proxy SSL termine HTTPS avant Apache)
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Bloquer les fichiers sensibles
+<FilesMatch "^(\.env|\.git|composer\.(json|lock)|phpunit\.xml|local\.php|.*\.sqlite.*)$">
+    Require all denied
+</FilesMatch>
+
+# Bloquer les répertoires internes
+RewriteRule ^(?:config|data|storage|src)(?:/|$) - [F,L]
+
+# Empêcher l'exécution de PHP dans les uploads
+<IfModule mod_authz_core.c>
+    <Directory "uploads">
+        <FilesMatch "\.(php|phtml|phar|php[0-9]*)$">
+            Require all denied
+        </FilesMatch>
+    </Directory>
+</IfModule>
+
+# Désactiver l'affichage des index de dossiers
+<IfModule mod_autoindex.c>
+    IndexIgnore *
+</IfModule>
